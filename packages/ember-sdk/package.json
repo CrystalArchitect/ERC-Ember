@@ -1,0 +1,24 @@
+{
+  "name": "@ember/sdk",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Direct-wallet SDK for canonical fee-free ERC-EMBER v1 credits.",
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./credits": "./src/credits.ts",
+    "./usage": "./src/usage.ts",
+    "./wallet": "./src/wallet.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc -b"
+  },
+  "peerDependencies": {},
+  "peerDependenciesMeta": {},
+  "dependencies": {},
+  "devDependencies": { "typescript": "6.0.3" }
+}

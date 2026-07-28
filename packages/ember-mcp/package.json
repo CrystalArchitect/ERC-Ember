@@ -1,0 +1,18 @@
+{
+  "name": "@ember/mcp",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Experimental, non-canonical MCP prototype. Not a v1 launch dependency.",
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./adapter": "./src/adapter.ts",
+    "./tools": "./src/tools.ts"
+  },
+  "files": ["src"],
+  "scripts": { "typecheck": "tsc -b" },
+  "dependencies": {},
+  "devDependencies": { "typescript": "6.0.3" }
+}

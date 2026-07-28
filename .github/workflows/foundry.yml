@@ -1,0 +1,89 @@
+name: Foundry
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          submodules: recursive
+
+      # Pin Foundry so CI does not depend on resolving the moving `stable`
+      # channel during every pull request run.
+      - uses: foundry-rs/foundry-toolchain@b00af27efadbc7b4ca8b82abbd903b17cc874d2a # v1
+        with:
+          version: v1.7.1
+
+      # `forge install` mishandles this nested layout (git root is the repo root,
+      # but Foundry's libs are under contracts/), failing with "Library directory
+      # is not relative to the repository root". Clone forge-std directly, pinned
+      # to the foundry.lock revision (v1.16.1).
+      - name: Install forge-std
+        run: |
+          git clone --no-checkout https://github.com/foundry-rs/forge-std lib/forge-std
+          git -C lib/forge-std checkout 620536fa5277db4e3fd46772d5cbc1ea0696fb43
+
+      - name: Check formatting
+        run: forge fmt --check
+
+      - name: Build
+        run: forge build --force
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            apps/deployer/package-lock.json
+            packages/ember-sdk/package-lock.json
+            packages/ember-mcp/package-lock.json
+
+      - name: Install deployer app
+        run: npm ci
+        working-directory: apps/deployer
+
+      - name: Audit deployer app
+        run: npm audit --omit=dev
+        working-directory: apps/deployer
+
+      - name: Build deployer app
+        run: npm run build
+        working-directory: apps/deployer
+
+      - name: Install and typecheck direct-wallet SDK
+        run: npm ci && npm run typecheck
+        working-directory: packages/ember-sdk
+
+      - name: Install and typecheck experimental MCP package
+        run: npm ci && npm run typecheck
+        working-directory: packages/ember-mcp
+
+      - name: Generated ABI drift
+        run: npm run generate && git diff --exit-code -- src/generated/contracts.ts
+        working-directory: apps/deployer
+
+      - name: Test
+        run: forge test -vvv
+
+      - name: Contract sizes (EIP-170 guard)
+        run: forge build --sizes
+
+      - name: Slither medium gate
+        run: pipx run --spec slither-analyzer slither . --exclude-informational --exclude-optimization --fail-medium
+
+      # Coverage is intentionally not run in CI. `forge coverage` must use
+      # `--ir-minimum` here (plain coverage disables via_ir and hits Solidity's
+      # stack-too-deep), which is slow/noisy. Run it locally instead:
+      #   forge coverage --ir-minimum

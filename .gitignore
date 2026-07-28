@@ -1,0 +1,36 @@
+# Foundry build output and local dependency installs
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+contracts/lib/
+
+# Local environment/editor files
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Deployer app local artifacts
+apps/deployer/node_modules/
+apps/deployer/dist/
+apps/deployer/tsconfig.tsbuildinfo
+
+# Package-local installs and compiler output
+packages/*/node_modules/
+packages/*/dist/
+packages/*/tsconfig.tsbuildinfo
+
+# Certora local scratch output
+.certora_config/
+.certora_internal/
+.certora_sources/
+.certora_metadata.json
+.certora_verify.json
+.configuration_layout.json
+run.conf
